@@ -39,7 +39,10 @@ export async function createDatabase(databaseUrl, initialSettings) {
 async function migrate(db) {
   const schema = db.schema;
   const mysql = db.client.config.client !== 'better-sqlite3';
-  if (!(await schema.hasTable('users'))) await schema.createTable('users', (t) => {
+  const hasTable = async (name) => mysql
+    ? Boolean(await db('information_schema.tables').select('table_name').whereRaw('table_schema = DATABASE()').where({ table_name: name }).first())
+    : schema.hasTable(name);
+  if (!(await hasTable('users'))) await schema.createTable('users', (t) => {
     t.increments('id').primary();
     t.string('twitch_id', 64).notNullable().unique();
     t.string('login', 100).notNullable();
@@ -52,25 +55,25 @@ async function migrate(db) {
     t.bigInteger('updated_at').notNullable();
     if (mysql) t.charset('utf8mb4');
   });
-  if (!(await schema.hasTable('sessions'))) await schema.createTable('sessions', (t) => {
+  if (!(await hasTable('sessions'))) await schema.createTable('sessions', (t) => {
     t.string('id_hash', 64).primary();
     t.integer('user_id').unsigned().notNullable().references('id').inTable('users').onDelete('CASCADE');
     t.bigInteger('created_at').notNullable();
     t.bigInteger('expires_at').notNullable().index();
     if (mysql) t.charset('utf8mb4');
   });
-  if (!(await schema.hasTable('follows'))) await schema.createTable('follows', (t) => {
+  if (!(await hasTable('follows'))) await schema.createTable('follows', (t) => {
     t.string('twitch_id', 64).primary();
     t.boolean('bonus_granted').notNullable().defaultTo(false);
     t.bigInteger('created_at').notNullable();
     if (mysql) t.charset('utf8mb4');
   });
-  if (!(await schema.hasTable('eventsub_messages'))) await schema.createTable('eventsub_messages', (t) => {
+  if (!(await hasTable('eventsub_messages'))) await schema.createTable('eventsub_messages', (t) => {
     t.string('message_id', 100).primary();
     t.bigInteger('received_at').notNullable().index();
     if (mysql) t.charset('utf8mb4');
   });
-  if (!(await schema.hasTable('redemptions'))) await schema.createTable('redemptions', (t) => {
+  if (!(await hasTable('redemptions'))) await schema.createTable('redemptions', (t) => {
     t.increments('id').primary();
     t.integer('user_id').unsigned().notNullable().references('id').inTable('users').onDelete('CASCADE');
     t.string('action_id', 30).notNullable();
@@ -80,18 +83,18 @@ async function migrate(db) {
     t.index(['user_id', 'action_id', 'created_at']);
     if (mysql) t.charset('utf8mb4');
   });
-  if (!(await schema.hasTable('app_state'))) await schema.createTable('app_state', (t) => {
+  if (!(await hasTable('app_state'))) await schema.createTable('app_state', (t) => {
     t.string('key', 80).primary();
     t.text('value').notNullable();
     if (mysql) t.charset('utf8mb4');
   });
-  if (!(await schema.hasTable('settings'))) await schema.createTable('settings', (t) => {
+  if (!(await hasTable('settings'))) await schema.createTable('settings', (t) => {
     t.string('key', 40).primary();
     t.text('value').notNullable();
     t.bigInteger('updated_at').notNullable();
     if (mysql) t.charset('utf8mb4');
   });
-  if (!(await schema.hasTable('streamer_auth'))) await schema.createTable('streamer_auth', (t) => {
+  if (!(await hasTable('streamer_auth'))) await schema.createTable('streamer_auth', (t) => {
     t.integer('id').primary();
     t.text('refresh_token_enc').notNullable();
     t.text('scopes').notNullable();
