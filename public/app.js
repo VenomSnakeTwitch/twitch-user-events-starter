@@ -93,6 +93,9 @@ function updateBalance() {
       ? 'Als Streamer sammelst du im eigenen Kanal keine Zuschau-Währung.'
       : 'Deine Zeit im Stream zahlt sich aus.';
     byId('login-link').classList.add('hidden');
+    byId('logout-button').classList.remove('hidden');
+    byId('delete-account-button').classList.remove('hidden');
+    byId('delete-confirm').classList.add('hidden');
     byId('admin-link').classList.toggle('hidden', !me.isAdmin);
     const interval = Math.max(1, cfg?.watchIntervalMinutes || 10);
     const minutes = me.watchMinutes || 0;
@@ -118,6 +121,9 @@ function updateBalance() {
     byId('welcome-name').textContent = 'Hallo, Zuschauer:in!';
     byId('watch-hint').textContent = 'Melde dich an, um deinen Fortschritt zu sehen.';
     byId('login-link').classList.remove('hidden');
+    byId('logout-button').classList.add('hidden');
+    byId('delete-account-button').classList.add('hidden');
+    byId('delete-confirm').classList.add('hidden');
     byId('admin-link').classList.add('hidden');
   }
 }
@@ -216,6 +222,28 @@ byId('checkin-button').addEventListener('click', async () => {
     const messages = { already_checked_in: 'Dein Check-in ist für heute schon erledigt.', not_live: 'Der Check-in ist verfügbar, wenn der Stream live ist.' };
     showToast(messages[error.message] || 'Der Check-in konnte gerade nicht gespeichert werden.');
   }
+});
+
+byId('logout-button').addEventListener('click', async () => {
+  try {
+    await request('/auth/logout', { method: 'POST', body: '{}' });
+    state.me = null;
+    updateBalance();
+    if (state.config) renderActions(state.config.actions || []);
+    showToast('Du wurdest abgemeldet.');
+  } catch { showToast('Abmelden ist gerade nicht möglich.'); }
+});
+
+byId('delete-account-button').addEventListener('click', () => byId('delete-confirm').classList.remove('hidden'));
+byId('delete-cancel-button').addEventListener('click', () => byId('delete-confirm').classList.add('hidden'));
+byId('delete-confirm-button').addEventListener('click', async () => {
+  try {
+    await request('/api/me/delete', { method: 'POST', body: '{}' });
+    state.me = null;
+    updateBalance();
+    if (state.config) renderActions(state.config.actions || []);
+    showToast('Dein Konto und die gespeicherten Daten wurden gelöscht.');
+  } catch { showToast('Das Konto konnte gerade nicht gelöscht werden.'); }
 });
 
 async function initialize() {

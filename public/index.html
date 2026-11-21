@@ -18,6 +18,7 @@
       <span class="live-pill"><span class="live-dot"></span><span id="live-label">Status wird geladen</span></span>
       <a class="button button-twitch" id="login-link" href="/auth/login">Mit Twitch anmelden <span aria-hidden="true">↗</span></a>
       <a class="button button-quiet hidden" id="admin-link" href="/admin">⚙ Admin</a>
+      <button class="button button-quiet hidden" id="logout-button" type="button">Abmelden</button>
     </nav>
   </header>
 
@@ -41,6 +42,8 @@
         <div class="progress-block"><div class="progress-label"><span>Dein nächster Meilenstein</span><span id="progress-label">—</span></div><div class="progress-track"><span id="progress-fill"></span></div><p class="progress-caption" id="progress-caption">Mit Twitch anmelden und live dabei sein.</p></div>
         <button class="button button-primary button-full" id="checkin-button" type="button" disabled>✦ <span id="checkin-label">Täglichen Check-in holen</span></button>
         <p class="button-hint" id="account-message">Melde dich mit Twitch an, um deinen Kontostand freizuschalten.</p>
+        <button class="text-button hidden" id="delete-account-button" type="button">Konto und Daten löschen</button>
+        <p class="button-hint hidden" id="delete-confirm">Dadurch werden dein Konto, dein Punktestand und deine gespeicherten Daten gelöscht. <button class="text-button" id="delete-confirm-button" type="button">Jetzt endgültig löschen</button> <button class="text-button" id="delete-cancel-button" type="button">Abbrechen</button></p>
       </div>
     </section>
 
