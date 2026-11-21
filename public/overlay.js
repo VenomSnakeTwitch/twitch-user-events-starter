@@ -43,6 +43,65 @@ function rain(count = 26) {
   setTimeout(() => layer.remove(), 5000);
 }
 
+function confetti(count = 70) {
+  const layer = document.createElement('div');
+  layer.className = 'confetti-layer';
+  const colors = ['#ff4d6d', '#ffd166', '#06d6a0', '#4cc9f0', '#b388ff', '#ffffff'];
+  for (let index = 0; index < count; index += 1) {
+    const piece = document.createElement('span');
+    piece.className = 'confetti-piece';
+    piece.style.left = `${Math.random() * 100}%`;
+    piece.style.setProperty('--confetti-color', colors[index % colors.length]);
+    piece.style.animationDelay = `${Math.random() * 0.8}s`;
+    piece.style.animationDuration = `${2.4 + Math.random() * 1.8}s`;
+    layer.append(piece);
+  }
+  document.body.append(layer);
+  setTimeout(() => layer.remove(), 5000);
+}
+
+function showSpotlight(name, actionName) {
+  const layer = document.createElement('div');
+  layer.className = 'spotlight-layer';
+  const card = document.createElement('div');
+  card.className = 'spotlight-card';
+  const title = document.createElement('strong');
+  title.textContent = actionName;
+  const viewer = document.createElement('span');
+  viewer.textContent = `Ausgelöst von ${name}`;
+  card.append(title, viewer);
+  layer.append(card);
+  document.body.append(layer);
+  setTimeout(() => layer.remove(), 3200);
+}
+
+function jumpScare() {
+  const layer = document.createElement('div');
+  layer.className = 'jumpscare-layer';
+  const face = document.createElement('div');
+  face.className = 'jumpscare-face';
+  face.textContent = '👹';
+  const text = document.createElement('strong');
+  text.textContent = 'BÖÖ!';
+  layer.append(face, text);
+  document.body.append(layer);
+  try {
+    const audio = new AudioContext();
+    const oscillator = audio.createOscillator();
+    const gain = audio.createGain();
+    oscillator.type = 'sawtooth';
+    oscillator.frequency.setValueAtTime(260, audio.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(75, audio.currentTime + 0.32);
+    gain.gain.setValueAtTime(0.14, audio.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + 0.38);
+    oscillator.connect(gain).connect(audio.destination);
+    oscillator.start();
+    oscillator.stop(audio.currentTime + 0.4);
+    oscillator.addEventListener('ended', () => audio.close(), { once: true });
+  } catch { /* Audio output can be unavailable in the browser source. */ }
+  setTimeout(() => layer.remove(), 1150);
+}
+
 function sound(file) {
   if (file) {
     const audio = new Audio(`/sounds/${encodeURIComponent(file)}`);
@@ -109,8 +168,15 @@ function handleEvent(event) {
   } else if (event.type === 'redeem') {
     if (event.actionType === 'sound') sound(event.soundFile);
     if (event.actionType === 'rain') rain();
+    if (event.actionType === 'confetti') confetti();
+    if (event.actionType === 'spotlight') showSpotlight(event.displayName, event.actionName);
+    if (event.actionType === 'jumpscare') jumpScare();
+    if (event.actionType === 'message') {
+      addMessage(event.displayName, `📣 ${event.actionName}`, 'announcement');
+      return;
+    }
     const detail = event.option ? ` stimmt für „${event.option}“` : ` löst „${event.actionName}“ aus`;
-    addMessage(event.displayName, detail, event.actionType === 'vote' ? 'vote' : '');
+    addMessage(event.displayName, detail, event.actionType === 'vote' ? 'vote' : event.actionType === 'jumpscare' ? 'scare' : '');
   } else if (event.type === 'vote') {
     showVotes(event);
   } else if (event.type === 'test') {

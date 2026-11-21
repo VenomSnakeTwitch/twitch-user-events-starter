@@ -133,7 +133,7 @@ function renderActions(actions) {
   const list = byId('action-list');
   list.replaceChildren();
   byId('action-count').textContent = `${actions.length} COMMUNITY-AKTIONEN`;
-  const styles = { sound: ['♫', 'SOUND', 'action-purple'], rain: ['✺', 'STREAM-EFFEKT', 'action-gold'], vote: ['☷', 'COMMUNITY-VOTE', 'action-blue'] };
+  const styles = { sound: ['♫', 'SOUND', 'action-purple'], rain: ['✺', 'WÄHRUNGSREGEN', 'action-gold'], vote: ['☷', 'COMMUNITY-VOTE', 'action-blue'], confetti: ['🎉', 'KONFETTI', 'action-gold'], message: ['📣', 'OVERLAY-NACHRICHT', 'action-blue'], spotlight: ['✦', 'SPOTLIGHT', 'action-purple'], jumpscare: ['☠', 'JUMPSCARE', 'action-red'] };
   for (const action of actions) {
     const [icon, tag, color] = styles[action.type] || styles.sound;
     const card = node('article', `action-card ${color}`);

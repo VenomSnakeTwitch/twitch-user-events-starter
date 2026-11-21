@@ -26,6 +26,10 @@ const settingsSchema = z.object({
     z.object({ ...baseAction, type: z.literal('sound'), soundFile: z.string().regex(/^[\p{L}\p{N} _-]{1,100}\.(mp3|wav|ogg|m4a)$/iu).nullable().optional() }).strict(),
     z.object({ ...baseAction, type: z.literal('rain') }).strict(),
     z.object({ ...baseAction, type: z.literal('vote'), options: z.array(z.string().min(1).max(40)).min(2).max(6) }).strict(),
+    z.object({ ...baseAction, type: z.literal('confetti') }).strict(),
+    z.object({ ...baseAction, type: z.literal('message') }).strict(),
+    z.object({ ...baseAction, type: z.literal('spotlight') }).strict(),
+    z.object({ ...baseAction, type: z.literal('jumpscare') }).strict(),
   ])).min(1).max(20),
 }).strict().superRefine((value, ctx) => {
   const ids = new Set();
