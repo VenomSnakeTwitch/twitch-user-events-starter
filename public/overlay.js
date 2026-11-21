@@ -43,7 +43,13 @@ function rain(count = 26) {
   setTimeout(() => layer.remove(), 5000);
 }
 
-function sound() {
+function sound(file) {
+  if (file) {
+    const audio = new Audio(`/sounds/${encodeURIComponent(file)}`);
+    audio.volume = 0.8;
+    audio.play().catch(() => {});
+    return;
+  }
   try {
     const audio = new AudioContext();
     const oscillator = audio.createOscillator();
@@ -101,7 +107,7 @@ function handleEvent(event) {
   if (event.type === 'follow') {
     addMessage(event.displayName, `folgt dem Kanal · +${event.amount} ${config.currencyEmoji || config.currencyName}`);
   } else if (event.type === 'redeem') {
-    if (event.actionType === 'sound') sound();
+    if (event.actionType === 'sound') sound(event.soundFile);
     if (event.actionType === 'rain') rain();
     const detail = event.option ? ` stimmt für „${event.option}“` : ` löst „${event.actionName}“ aus`;
     addMessage(event.displayName, detail, event.actionType === 'vote' ? 'vote' : '');

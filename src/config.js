@@ -23,7 +23,7 @@ const settingsSchema = z.object({
   watchIntervalMinutes: z.number().int().min(1).max(120),
   leaderboardSize: z.number().int().min(3).max(50),
   actions: z.array(z.discriminatedUnion('type', [
-    z.object({ ...baseAction, type: z.literal('sound') }).strict(),
+    z.object({ ...baseAction, type: z.literal('sound'), soundFile: z.string().regex(/^[A-Za-z0-9_-]{1,60}\.(mp3|wav|ogg|m4a)$/i).nullable().optional() }).strict(),
     z.object({ ...baseAction, type: z.literal('rain') }).strict(),
     z.object({ ...baseAction, type: z.literal('vote'), options: z.array(z.string().min(1).max(40)).min(2).max(6) }).strict(),
   ])).min(1).max(20),
