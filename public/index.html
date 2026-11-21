@@ -3,32 +3,64 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Zuschauer-Hub: bald live</title>
+  <meta name="theme-color" content="#111114">
+  <meta name="description" content="Dein Platz in der Stream-Community: sammle virtuelle Währung, löse Aktionen aus und stimme mit ab.">
+  <title>Zuschauer-Hub</title>
   <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
 </head>
 <body>
-  <div class="rain" aria-hidden="true">
-    <span>🍌</span><span>🍌</span><span>🍌</span><span>🍌</span><span>🍌</span>
-    <span>🍌</span><span>🍌</span><span>🍌</span><span>🍌</span><span>🍌</span>
-    <span>🍌</span><span>🍌</span>
-  </div>
+  <div class="ambient ambient-one" aria-hidden="true"></div>
+  <div class="ambient ambient-two" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Zur Startseite"><span class="brand-mark">✦</span><span id="hub-name">Zuschauer-Hub</span></a>
+    <nav class="top-actions" aria-label="Hauptnavigation">
+      <span class="live-pill"><span class="live-dot"></span><span id="live-label">Status wird geladen</span></span>
+      <a class="button button-twitch" id="login-link" href="/auth/login">Mit Twitch anmelden <span aria-hidden="true">↗</span></a>
+      <a class="button button-quiet hidden" id="admin-link" href="/admin">⚙ Admin</a>
+    </nav>
+  </header>
 
-  <main class="card">
-    <div class="badge"><span class="dot"></span> Online</div>
-    <h1>Hier entsteht dein <span class="accent">Zuschauer-Hub</span></h1>
-    <p class="lead">
-      Deine Seite ist live, auf deiner eigenen Domain.
-      Als Nächstes baut Claude Code hier den Twitch-Login, die Bananen, die Rangliste und das OBS-Overlay.
-    </p>
+  <main class="layout">
+    <section class="hero panel" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="sparkle">✦</span> DEIN PLATZ IN DER COMMUNITY</div>
+        <h1 id="hero-title">Mehr als nur <span>zuschauen.</span></h1>
+        <p class="hero-lead">Sei live dabei, sammle Community-Währung und gestalte den Stream aktiv mit.</p>
+        <div class="hero-cta"><a class="button button-twitch button-large" href="/auth/login">Mit Twitch anmelden <span aria-hidden="true">↗</span></a><span class="micro-copy">Ein Klick. Dein Twitch-Konto. Willkommen im Hub.</span></div>
+      </div>
+      <div class="hero-art" aria-hidden="true"><div class="orbit orbit-a"></div><div class="orbit orbit-b"></div><div class="orb-core">✦</div><div class="float-chip chip-one">✧</div><div class="float-chip chip-two">＋</div><div class="float-chip chip-three">✦</div><div class="art-caption">GEMEINSAM IM STREAM</div></div>
+      <div class="hero-bottom"><div class="avatar-stack" aria-hidden="true"><span>J</span><span>M</span><span>L</span><span>+</span></div><p><strong>Deine Community.</strong> Deine Momente.</p><span class="hero-separator"></span><p class="currency-note"><span id="currency-hero">Community-Währung</span> ist virtuell und hat keinen Geldwert.</p></div>
+    </section>
 
-    <ol class="steps">
-      <li class="done"><span>✓</span> Seite online</li>
-      <li><span>2</span> Twitch-App anlegen</li>
-      <li><span>3</span> <code>/hub-bauen</code> in Claude Code</li>
-      <li><span>4</span> Live im Stream</li>
-    </ol>
+    <section class="account panel" aria-labelledby="account-title">
+      <div class="section-heading"><div><span class="eyebrow">DEIN KONTO</span><h2 id="account-title">Dein Fortschritt</h2></div><span class="round-icon">↗</span></div>
+      <div id="account-content" class="account-content">
+        <div class="balance-card"><div class="balance-top"><span class="muted-label">DEIN KONTOSTAND</span><span class="balance-icon" id="currency-icon">✦</span></div><div class="balance-value"><strong id="balance-value">—</strong><span id="currency-name">Währung</span></div><div class="balance-foot"><span class="mini-spark">✧</span> Sammle bei jedem Stream weiter</div></div>
+        <div class="account-row"><div><strong id="welcome-name">Hallo, Zuschauer:in!</strong><p id="watch-hint">Melde dich an, um deinen Fortschritt zu sehen.</p></div><span class="user-icon">◎</span></div>
+        <div class="progress-block"><div class="progress-label"><span>Dein nächster Meilenstein</span><span id="progress-label">—</span></div><div class="progress-track"><span id="progress-fill"></span></div><p class="progress-caption" id="progress-caption">Mit Twitch anmelden und live dabei sein.</p></div>
+        <button class="button button-primary button-full" id="checkin-button" type="button" disabled>✦ <span id="checkin-label">Täglichen Check-in holen</span></button>
+        <p class="button-hint" id="account-message">Melde dich mit Twitch an, um deinen Kontostand freizuschalten.</p>
+      </div>
+    </section>
+
+    <section class="actions-section panel" aria-labelledby="actions-title">
+      <div class="section-heading"><div><span class="eyebrow">MACH DEN STREAM ZU DEINEM</span><h2 id="actions-title">Deine Aktionen</h2></div><span class="section-meta" id="action-count">COMMUNITY-POWER</span></div>
+      <div class="action-grid" id="action-list"><article class="action-card action-purple"><div class="action-icon">♫</div><div class="action-body"><span class="action-tag">SOUND</span><h3>Sound abspielen</h3><p>Lass deinen Lieblingsmoment hören.</p></div><div class="action-footer"><span class="price">— <span class="price-currency">✦</span></span><button type="button" class="button button-card" disabled>Anmelden</button></div></article><article class="action-card action-gold"><div class="action-icon">✺</div><div class="action-body"><span class="action-tag">STREAM-EFFEKT</span><h3>Besonderer Moment</h3><p>Mach den Stream für alle unvergesslich.</p></div><div class="action-footer"><span class="price">— <span class="price-currency">✦</span></span><button type="button" class="button button-card" disabled>Anmelden</button></div></article><article class="action-card action-blue"><div class="action-icon">☷</div><div class="action-body"><span class="action-tag">COMMUNITY-VOTE</span><h3>Stimme mit ab</h3><p>Entscheide gemeinsam mit der Community.</p></div><div class="action-footer"><span class="price">— <span class="price-currency">✦</span></span><button type="button" class="button button-card" disabled>Anmelden</button></div></article></div>
+    </section>
+
+    <aside class="leaderboard panel" aria-labelledby="leaderboard-title">
+      <div class="section-heading"><div><span class="eyebrow">DIE COMMUNITY</span><h2 id="leaderboard-title">Rangliste</h2></div><span class="trophy">♜</span></div>
+      <p class="leaderboard-intro">Wer ist diese Woche ganz vorne?</p>
+      <ol class="leader-list" id="leader-list"><li class="empty-rank">Melde dich an und starte deinen Weg nach oben.</li></ol>
+      <div class="leaderboard-footer"><span class="rank-dot"></span> <span id="leader-status">Dein nächster Platz wartet.</span></div>
+    </aside>
+
+    <section class="community-strip panel"><div class="strip-icon">◉</div><div><span class="eyebrow">ZUSAMMEN LIVE</span><h2>Deine Zeit im Stream zählt.</h2><p>Sei im Twitch-Chat dabei, unterstütze die Community und sammle automatisch mit.</p></div><a class="button button-outline" href="/auth/login">Jetzt mitmachen <span aria-hidden="true">→</span></a></section>
+    <div class="setup-banner hidden" id="setup-banner" role="status"><span class="setup-mark">i</span><div><strong>Der Hub wird gerade eingerichtet.</strong><p>Die Community-Funktionen sind verfügbar, sobald der Streamer die Verbindung eingerichtet hat.</p></div></div>
   </main>
 
-  <footer>Gebaut mit Claude Code · Starter: twitch-user-events-starter</footer>
+  <footer class="footer"><a class="brand footer-brand" href="/"><span class="brand-mark">✦</span><span id="footer-hub-name">Zuschauer-Hub</span></a><span>Für die Community, mit der Community.</span><div class="footer-links"><a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a></div></footer>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
 </body>
 </html>

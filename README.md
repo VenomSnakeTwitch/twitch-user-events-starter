@@ -66,7 +66,18 @@ Ab dann hält sich Claude Code dort automatisch an dieselben Regeln.
 
 ## Hosting
 
-Der Hub läuft auf jedem Node.js-Hosting mit MySQL-Datenbank. Im Video nutze ich [Hostinger](https://hostinger.com/nilson89) (Werbelink): Node.js-Web-Apps mit GitHub-Anbindung und automatischem Deploy bei jedem Push. Mit dem Code **NILSON89** gibt es zusätzlich Rabatt.
+Der Hub läuft auf Node.js-Hosting. Für Render liegt eine `render.yaml` im Repository. So startest du den Webservice:
+
+1. Lege eine eigene Kopie dieses Repositories in deinem GitHub-Konto an und übertrage die Änderungen dorthin.
+2. Öffne das [Render-Dashboard](https://dashboard.render.com/), wähle **New → Blueprint** und verbinde dein GitHub-Repository.
+3. Render liest `render.yaml` ein. Prüfe den Service `twitch-zuschauer-hub` und starte das Blueprint-Deployment.
+4. Nach dem Deploy erreichst du die Seite über die Render-Adresse des Services. `/healthz` dient Render als Health Check.
+
+Das Blueprint richtet zunächst nur den Node-Webservice ein. Twitch-Login, Konten, Aktionen und Rangliste benötigen die Backend-Funktionen aus `SPEC.md`, die im Starter noch nicht enthalten sind. Für den vollständigen Hub sind außerdem die Twitch-Umgebungsvariablen und eine dauerhaft erreichbare MySQL-Datenbank nötig. Zugangsdaten gehören in Render unter **Environment**, niemals in `render.yaml` oder Git.
+
+Render-Free-Webservices schlafen nach Inaktivität ein und haben kein dauerhaftes lokales Dateisystem. Sie eignen sich deshalb für eine Vorschau der Webseite, nicht für einen produktiven Hub mit SQLite-Datei oder gespeicherten Währungsständen. Plane für den vollständigen Betrieb einen passenden Webservice und eine externe MySQL-Datenbank ein.
+
+Der Hub läuft grundsätzlich auch auf anderem Node.js-Hosting mit MySQL-Datenbank.
 
 ## Rechtliches
 
