@@ -433,7 +433,7 @@ app.put('/api/admin/settings', requireReady, requireAdmin, async (req, res, next
       if (action.type !== 'sound' || !action.soundFile) continue;
       const soundDir = path.join(publicDir, 'sounds');
       const soundPath = path.join(soundDir, path.basename(action.soundFile));
-      if (!/^[A-Za-z0-9_-]{1,60}\.(mp3|wav|ogg|m4a)$/i.test(action.soundFile) || path.dirname(soundPath) !== soundDir || !fs.existsSync(soundPath)) return sendError(res, 400, 'invalid_input');
+      if (!/^[\p{L}\p{N} _-]{1,100}\.(mp3|wav|ogg|m4a)$/iu.test(action.soundFile) || path.dirname(soundPath) !== soundDir || !fs.existsSync(soundPath)) return sendError(res, 400, 'invalid_input');
     }
     const previous = await getSettings(db);
     const beforeVote = previous.actions.find((action) => action.type === 'vote');
@@ -454,7 +454,7 @@ app.get('/api/admin/currency-images', requireReady, requireAdmin, (_req, res, ne
 app.get('/api/admin/sounds', requireReady, requireAdmin, (_req, res, next) => {
   fs.readdir(path.join(publicDir, 'sounds'), (error, files) => {
     if (error) return next(error);
-    res.json({ sounds: files.filter((file) => /^[A-Za-z0-9_-]{1,60}\.(mp3|wav|ogg|m4a)$/i.test(file)) });
+    res.json({ sounds: files.filter((file) => /^[\p{L}\p{N} _-]{1,100}\.(mp3|wav|ogg|m4a)$/iu.test(file)) });
   });
 });
 app.post('/api/admin/streamer/revoke', requireReady, requireAdmin, async (_req, res, next) => {
