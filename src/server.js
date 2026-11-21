@@ -443,6 +443,34 @@ app.put('/api/admin/settings', requireReady, requireAdmin, async (req, res, next
     res.json({ settings: parsed.data });
   } catch (e) { next(e); }
 });
+app.post('/api/admin/users/balance', requireReady, requireAdmin, async (req, res, next) => {
+  try {
+    const schema = z.object({
+      target: z.enum(['self', 'user']),
+      login: z.string().trim().min(1).max(100).optional(),
+      operation: z.enum(['add', 'subtract', 'set']),
+      amount: z.number().int().min(0).max(2_147_483_647),
+    }).strict();
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success || (parsed.data?.target === 'user' && !parsed.data.login)) return sendError(res, 400, 'invalid_input');
+    const { target, login, operation, amount } = parsed.data;
+    const result = await db.transaction(async (trx) => {
+      let query = trx('users');
+      query = target === 'self' ? query.where({ id: req.viewer.id }) : query.whereRaw('LOWER(login) = ?', [login.toLowerCase()]);
+      const user = await query.forUpdate().first();
+      if (!user) return { error: 'user_not_found' };
+      let nextBalance = amount;
+      if (operation === 'add') nextBalance = user.bananas + amount;
+      if (operation === 'subtract') nextBalance = user.bananas - amount;
+      if (nextBalance < 0) return { error: 'insufficient_balance' };
+      if (nextBalance > 2_147_483_647) return { error: 'balance_limit' };
+      await trx('users').where({ id: user.id }).update({ bananas: nextBalance, updated_at: Date.now() });
+      return { displayName: user.display_name, login: user.login, bananas: nextBalance };
+    });
+    if (result.error) return sendError(res, result.error === 'user_not_found' ? 404 : 400, result.error);
+    res.json(result);
+  } catch (e) { next(e); }
+});
 app.get('/api/admin/overlay-url', requireReady, requireAdmin, (req, res) => res.json({ url: `${config.baseUrl}/overlay?key=${encodeURIComponent(config.overlayKey)}`, width: 1920, height: 1080 }));
 app.post('/api/admin/overlay/test', requireReady, requireAdmin, (_req, res) => { publish({ type: 'test' }); res.json({ ok: true }); });
 app.get('/api/admin/currency-images', requireReady, requireAdmin, (_req, res, next) => {
