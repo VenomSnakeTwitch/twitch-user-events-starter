@@ -496,7 +496,11 @@ async function bootstrap() {
     catch (error) {
       setupIssues.push({ name: 'DATABASE_URL', reason: 'ungültig' });
       const databaseError = /^[A-Z0-9_]{1,64}$/.test(String(error?.code || '')) ? error.code : 'UNKNOWN';
-      log(`Datenbankverbindung fehlgeschlagen (${databaseError}); die App startet im Einrichtungsmodus.`);
+      const missingTable = databaseError === 'ER_NO_SUCH_TABLE'
+        ? String(error?.sqlMessage || '').match(/Table '[^']*\.([^'.]+)' doesn't exist/i)?.[1]
+        : null;
+      const tableDetail = missingTable && /^[A-Za-z0-9_]{1,64}$/.test(missingTable) ? `, Tabelle ${missingTable}` : '';
+      log(`Datenbankverbindung fehlgeschlagen (${databaseError}${tableDetail}); die App startet im Einrichtungsmodus.`);
     }
   }
   if (db && config.ready) {
