@@ -142,6 +142,7 @@ function renderActions(actions) {
     body.append(node('span', 'action-tag', tag), node('h3', '', action.name), node('p', '', action.description || 'Eine Aktion für den gemeinsamen Stream-Moment.'));
     card.append(body);
     let option;
+    let spotlightName;
     if (action.type === 'vote' && action.options?.length) {
       const wrap = node('div', 'action-extra');
       option = node('select');
@@ -150,27 +151,44 @@ function renderActions(actions) {
       wrap.append(option);
       card.append(wrap);
     }
+    if (action.type === 'spotlight') {
+      const wrap = node('label', 'action-extra spotlight-input');
+      wrap.append(node('span', '', 'Twitch-Kanalname für das Spotlight'));
+      spotlightName = node('input');
+      spotlightName.type = 'text';
+      spotlightName.maxLength = 25;
+      spotlightName.autocomplete = 'off';
+      spotlightName.placeholder = 'z. B. VenomSnake_Twitch';
+      spotlightName.required = true;
+      wrap.append(spotlightName, node('small', '', 'Der Link zum eingegebenen Twitch-Kanal erscheint im Overlay.'));
+      card.append(wrap);
+    }
     const footer = node('div', 'action-footer');
     const price = node('span', 'price');
     price.append(currencyNode(action.cost));
     const button = node('button', 'button button-card', state.me ? 'Einlösen' : 'Anmelden');
     button.type = 'button';
     button.disabled = !state.me;
-    button.addEventListener('click', () => redeem(action, option?.value));
+    button.addEventListener('click', () => redeem(action, option?.value, spotlightName?.value));
     footer.append(price, button);
     card.append(footer);
     list.append(card);
   }
 }
 
-async function redeem(action, option) {
+async function redeem(action, option, enteredChannel) {
+  const spotlightName = enteredChannel?.trim();
+  if (action.type === 'spotlight' && !spotlightName) {
+    showToast('Bitte gib den Twitch-Kanalnamen ein.');
+    return;
+  }
   try {
-    const result = await request('/api/redeem', { method: 'POST', body: JSON.stringify({ actionId: action.id, ...(option ? { option } : {}) }) });
+    const result = await request('/api/redeem', { method: 'POST', body: JSON.stringify({ actionId: action.id, ...(option ? { option } : {}), ...(action.type === 'spotlight' ? { spotlightName } : {}) }) });
     state.me.bananas = result.bananas;
     updateBalance();
     showToast(`${action.name} wurde ausgelöst!`);
   } catch (error) {
-    const messages = { not_enough_bananas: 'Dafür reicht dein aktueller Kontostand noch nicht.', cooldown: 'Diese Aktion ist gleich wieder verfügbar.', not_live: 'Die Aktion ist verfügbar, wenn der Stream live ist.', invalid_option: 'Bitte wähle eine gültige Option.' };
+    const messages = { not_enough_bananas: 'Dafür reicht dein aktueller Kontostand noch nicht.', cooldown: 'Diese Aktion ist gleich wieder verfügbar.', not_live: 'Die Aktion ist verfügbar, wenn der Stream live ist.', invalid_option: 'Bitte wähle eine gültige Option.', invalid_spotlight_name: 'Bitte gib einen gültigen Twitch-Kanalnamen ein (Buchstaben, Zahlen, Unterstrich; höchstens 25 Zeichen).' };
     showToast(messages[error.message] || 'Die Aktion konnte gerade nicht ausgelöst werden.');
   }
 }

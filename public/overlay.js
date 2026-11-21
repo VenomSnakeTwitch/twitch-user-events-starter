@@ -60,16 +60,21 @@ function confetti(count = 70) {
   setTimeout(() => layer.remove(), 5000);
 }
 
-function showSpotlight(name, actionName) {
+function showSpotlight(event) {
   const layer = document.createElement('div');
   layer.className = 'spotlight-layer';
   const card = document.createElement('div');
   card.className = 'spotlight-card';
   const title = document.createElement('strong');
-  title.textContent = actionName;
+  title.textContent = event.spotlightName;
   const viewer = document.createElement('span');
-  viewer.textContent = `Ausgelöst von ${name}`;
-  card.append(title, viewer);
+  viewer.textContent = `Vorgestellt von ${event.displayName}`;
+  const link = document.createElement('a');
+  link.href = event.channelUrl;
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.textContent = event.channelUrl.replace(/^https:\/\/(www\.)?/, '');
+  card.append(title, viewer, link);
   layer.append(card);
   document.body.append(layer);
   setTimeout(() => layer.remove(), 3200);
@@ -169,7 +174,7 @@ function handleEvent(event) {
     if (event.actionType === 'sound') sound(event.soundFile);
     if (event.actionType === 'rain') rain();
     if (event.actionType === 'confetti') confetti();
-    if (event.actionType === 'spotlight') showSpotlight(event.displayName, event.actionName);
+    if (event.actionType === 'spotlight') showSpotlight(event);
     if (event.actionType === 'jumpscare') jumpScare();
     if (event.actionType === 'message') {
       addMessage(event.displayName, `📣 ${event.actionName}`, 'announcement');

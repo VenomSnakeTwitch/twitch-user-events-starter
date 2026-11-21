@@ -350,12 +350,15 @@ app.post('/api/checkin', requireReady, requireLogin, async (req, res, next) => {
 });
 app.post('/api/redeem', requireReady, requireLogin, redeemLimiter, async (req, res, next) => {
   try {
-    const schema = z.object({ actionId: z.string().min(1).max(50), option: z.string().max(100).optional() }).strict();
+    const schema = z.object({ actionId: z.string().min(1).max(50), option: z.string().max(100).optional(), spotlightName: z.string().trim().min(1).max(25).optional() }).strict();
     const parsed = schema.safeParse(req.body);
     if (!parsed.success) return sendError(res, 400, 'invalid_input');
     const settings = await getSettings(db);
     const action = settings.actions.find((entry) => entry.id === parsed.data.actionId);
     if (!action) return sendError(res, 400, 'unknown_action');
+    if (action.type === 'spotlight' && !parsed.data.spotlightName) return sendError(res, 400, 'invalid_spotlight_name');
+    if (parsed.data.spotlightName && !/^[a-z0-9_]{1,25}$/i.test(parsed.data.spotlightName)) return sendError(res, 400, 'invalid_spotlight_name');
+    if (action.type !== 'spotlight' && parsed.data.spotlightName !== undefined) return sendError(res, 400, 'invalid_input');
     if (action.type === 'vote' && (!parsed.data.option || !action.options.includes(parsed.data.option))) return sendError(res, 400, 'invalid_option');
     if (action.type !== 'vote' && parsed.data.option !== undefined) return sendError(res, 400, 'invalid_input');
     if (!(await currentLive())) return sendError(res, 409, 'not_live');
@@ -377,7 +380,7 @@ app.post('/api/redeem', requireReady, requireLogin, redeemLimiter, async (req, r
       const status = { cooldown: 429, not_enough_bananas: 402, unauthorized: 401 }[result.error] || 400;
       return sendError(res, status, result.error);
     }
-    const event = { type: 'redeem', actionId: action.id, actionType: action.type, actionName: action.name, displayName: req.viewer.display_name, ...(action.type === 'sound' && action.soundFile ? { soundFile: action.soundFile } : {}), ...(parsed.data.option ? { option: parsed.data.option } : {}) };
+    const event = { type: 'redeem', actionId: action.id, actionType: action.type, actionName: action.name, displayName: req.viewer.display_name, ...(action.type === 'sound' && action.soundFile ? { soundFile: action.soundFile } : {}), ...(action.type === 'spotlight' ? { spotlightName: parsed.data.spotlightName, channelUrl: `https://www.twitch.tv/${encodeURIComponent(parsed.data.spotlightName)}` } : {}), ...(parsed.data.option ? { option: parsed.data.option } : {}) };
     publish(event);
     if (action.type === 'vote') {
       const voteResetAt = await getState(db, 'vote_reset_at', '0');
