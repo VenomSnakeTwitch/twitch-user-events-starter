@@ -59,6 +59,11 @@ export function readConfig(env = process.env) {
   let databaseUrl = env.DATABASE_URL || '';
   if (!databaseUrl && mode !== 'production') databaseUrl = 'file:./data/hub.sqlite';
   if (databaseUrl && !databaseUrl.startsWith('file:') && !/^mysql:\/\//i.test(databaseUrl)) issues.push({ name: 'DATABASE_URL', reason: 'ungültig' });
+  if (mode === 'production' && /^mysql:\/\//i.test(databaseUrl)) {
+    let urlPassword = '';
+    try { urlPassword = new URL(databaseUrl).password; } catch {}
+    if (!truthy(env.DATABASE_PASSWORD) && !urlPassword) issues.push({ name: 'DATABASE_PASSWORD', reason: 'fehlt' });
+  }
 
   const configPath = mode === 'test' && env.HUB_CONFIG_FILE
     ? path.resolve(rootDir, env.HUB_CONFIG_FILE)

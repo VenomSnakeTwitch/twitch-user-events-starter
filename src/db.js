@@ -10,7 +10,16 @@ function makeClient(databaseUrl) {
     fs.mkdirSync(path.dirname(filename), { recursive: true });
     return knex({ client: 'better-sqlite3', connection: { filename }, useNullAsDefault: true, pool: { min: 1, max: 1 }, acquireConnectionTimeout: 10000 });
   }
-  return knex({ client: 'mysql2', connection: databaseUrl, pool: { min: 0, max: 8 }, acquireConnectionTimeout: 10000, charset: 'utf8mb4' });
+  const url = new URL(databaseUrl);
+  const connection = {
+    host: url.hostname,
+    port: Number(url.port || 3306),
+    user: decodeURIComponent(url.username),
+    password: process.env.DATABASE_PASSWORD ?? decodeURIComponent(url.password),
+    database: decodeURIComponent(url.pathname.slice(1)),
+  };
+  if (process.env.DATABASE_SSL === 'true') connection.ssl = { minVersion: 'TLSv1.2' };
+  return knex({ client: 'mysql2', connection, pool: { min: 0, max: 8 }, acquireConnectionTimeout: 10000, charset: 'utf8mb4' });
 }
 
 export async function createDatabase(databaseUrl, initialSettings) {
