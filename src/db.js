@@ -39,8 +39,9 @@ export async function createDatabase(databaseUrl, initialSettings) {
 async function migrate(db) {
   const schema = db.schema;
   const mysql = db.client.config.client !== 'better-sqlite3';
+  const databaseName = db.client.config.connection?.database;
   const hasTable = async (name) => mysql
-    ? Boolean(await db('information_schema.tables').select('table_name').whereRaw('table_schema = DATABASE()').where({ table_name: name }).first())
+    ? Boolean(await db('information_schema.tables').select('table_name').where({ table_schema: databaseName, table_name: name }).first())
     : schema.hasTable(name);
   if (!(await hasTable('users'))) await schema.createTable('users', (t) => {
     t.increments('id').primary();
