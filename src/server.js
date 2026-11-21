@@ -493,9 +493,10 @@ app.use((error, _req, res, _next) => {
 async function bootstrap() {
   if (config.ready) {
     try { db = await createDatabase(config.databaseUrl, config.settings); }
-    catch {
+    catch (error) {
       setupIssues.push({ name: 'DATABASE_URL', reason: 'ungültig' });
-      log('Datenbankverbindung fehlgeschlagen; die App startet im Einrichtungsmodus.');
+      const databaseError = /^[A-Z0-9_]{1,64}$/.test(String(error?.code || '')) ? error.code : 'UNKNOWN';
+      log(`Datenbankverbindung fehlgeschlagen (${databaseError}); die App startet im Einrichtungsmodus.`);
     }
   }
   if (db && config.ready) {
